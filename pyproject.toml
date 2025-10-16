@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meteolyzer"
+version = "0.0.1"
+description = "Loading and processing data management framework"
+readme = "README.md"
+license = { text = "LICENSE.txt" }
+authors = [
+    { name = "Elliott Walker", email = "walker.elliott.j@gmail.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+
+[project.urls]
+Source = "https://github.com/Intergalactyc/meteolyzer"
+Homepage = "https://github.com/Intergalactyc/meteolyzer"
+
+[tool.setuptools.packages.find]
+include = ["windprofiles", "windprofiles.*"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.black]
+line-length = 79
+skip-string-normalization = false
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | docs
+)/
+'''

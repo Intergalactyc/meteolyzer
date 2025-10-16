@@ -1,0 +1,6 @@
+numpy
+pandas
+tqdm
+platformdirs
+pre-commit
+pytest

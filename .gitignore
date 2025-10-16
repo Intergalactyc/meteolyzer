@@ -1,0 +1,15 @@
+__pycache__/
+*.egg-info/
+*.whl
+
+dist/
+build/
+
+venv/
+.venv/
+venv*/
+
+.stignore
+*.sync-conflict*
+
+.pytest_cache/
