@@ -13,6 +13,7 @@ class Loader(ABC):
         all_files = self.get_files()
         self._to_process = self.get_files()
         self._to_process.reverse()
+        self.count = len(all_files)
 
         try:
             self._timestamps = [self.file_to_timestamp(f) for f in all_files]

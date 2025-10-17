@@ -4,16 +4,10 @@ from datetime import datetime, timedelta
 import pathlib
 import os
 from tqdm import tqdm
-from multiprocessing import Pool, Manager
+from multiprocessing import Pool
 
 def _picklable_worker(worker, *args, **kwargs):
     return worker(*args, **kwargs)
-
-def _worker_wrapper(args):
-    worker_func, df, ts, dt = args
-    res = _picklable_worker(worker_func, df, timestamp=ts, interval=dt)
-    res |= {"timestamp": ts}
-    return res
 
 class Processor(ABC):
     def __init__(self, directory: pathlib.Path, *args, **kwargs):
@@ -21,17 +15,16 @@ class Processor(ABC):
         if not os.path.isdir(directory):
             os.makedirs(directory)
 
-    def _process_batch(self, batch, nproc, pbar=None):
-        args_list = [(self._worker, df, ts, dt) for ts, df, dt in batch]
-
+    def _process_batch(self, batch: list[tuple[datetime, pd.DataFrame, timedelta]], nproc: int, pbar: tqdm):
         results = []
-        with Pool(processes=nproc) as pool:
-            # Wrap the iterator in tqdm for proper updates
-            for res in tqdm(pool.imap_unordered(_worker_wrapper, args_list), total=len(args_list), desc="Processing batch"):
-                results.append(res)
-                if pbar is not None:
-                    pbar.update(1)  # optional external bar
-
+        pool = Pool(processes=nproc)
+        batch_rules = [(self._worker, df, ts, dt) for ts, df, dt in batch]
+        for res in pool.imap(_picklable_worker, batch_rules):
+        #for ts, df, dt in batch:
+            # TODO: multiprocessing
+            #for res in pool.imap(_picklable_worker, self._worker, df, timestamp=ts, interval=dt)
+            res |= {"timestamp" : ts}
+            results.append(res)
         out = pd.DataFrame(results)
         out.set_index("timestamp", inplace=True)
         out.sort_index(inplace=True)
@@ -39,7 +32,7 @@ class Processor(ABC):
         out.to_csv(self._directory.joinpath(start.strftime("%Y-%m-%d_%H-%M-%S") + ".csv"))
 
     def _worker(self, df, *args, **kwargs):
-        return self.process_frame(df, *args, **kwargs)
+        return self.process_frame(df)
 
     @abstractmethod
     def process_frame(self, df: pd.DataFrame, *args, **kwargs) -> dict:
@@ -51,3 +44,4 @@ class Processor(ABC):
         However, do not make the timestamp part of the result, it will automatically be added.
         """
         pass
+    

@@ -36,7 +36,7 @@ class BareProcessor(Processor):
     def __init__(self, config):
         super().__init__(config["output"])
 
-    def process_frame(self, df):
+    def process_frame(self, df, *args, **kwargs):
         return {"rows":len(df), "a":df["a"].mean(), "b":df["b"].mean()}
 
 def get_config():
